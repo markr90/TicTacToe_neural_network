@@ -1,4 +1,7 @@
-`# A Tic Tac Toe python game
+ # A Tic Tac Toe python game
+ 
+ Code hasn't been commented yet.
+ 
  A Tic Tac Toe python game that Credits for inspiration of some of the snippets of code:
  [Code inspiration for the game basics definition](https://inventwithpython.com/chapter10.html)
  [Code inspiration for the neural network implementation](https://www.kaggle.com/kernels/scriptcontent/8507336/download)
@@ -26,4 +29,5 @@
  This bot is pre-trained uniformly against the hard, easy, and random bots. 
  Bot can be retrained when running the game and bots to train against can be selected.
  It has two optimal deterministic moves to improve training: Winning when it can make 3 in a row, and blocking when opponent can make 3 in a row.
+ 
  
