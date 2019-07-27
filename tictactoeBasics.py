@@ -73,7 +73,7 @@ class TicTacToeGame(object):
             return playerLetter, computerLetter
         else:
             print("Not a valid choice.")
-            return TicTacToeGame.selectPlayer()
+            return self.selectPlayer()
     
         return playerLetter, computerLetter
 

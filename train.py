@@ -33,9 +33,17 @@ def train(model, mode, print_progress = False):
     while playing:
         if whosTurn == "player": 
             # Deterministic bot plays
-            if mode == "deterministic":
-                move = botDeterministic.getComputerMove(game, bobLetter)
+            if mode == "hard":
+                if print_progress:                
+                    print("playing against hard")
+                move = botDeterministic.getComputerMove(game, bobLetter, mode)
+            if mode == "easy":
+                if print_progress:                
+                    print("playing against easy")
+                move = botDeterministic.getComputerMove(game, bobLetter, mode)
             if mode == "random":
+                if print_progress:
+                    print("playing against random")
                 move = botRandom.getComputerMove(game, bobLetter)
             game.makeMove(bobLetter, move)
             if print_progress:

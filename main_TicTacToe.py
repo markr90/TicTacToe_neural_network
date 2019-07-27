@@ -118,16 +118,27 @@ def main(model):
         if not replay():
             break
         
-def train_model(model, nIterations, resolution = 10000):
+def train_model(model, botsToTrain, nIterations, resolution = 10000):
     training_data = pd.DataFrame()
     game_counter = 1
-    modes = ["deterministic", "random"]
+    availableModes = ["hard", "easy", "random"]
+    
+    modes = []
+    for i in botsToTrain:
+        modes.append(availableModes[int(i) - 1])
+        
+    if len(modes) == 0:
+        modes = availableModes[:]
+    
+    
+    selected_mode = random.choice(modes)
     while game_counter <= nIterations:
-        selected_mode = random.choice(modes)
         model, y, result = train.train(model, selected_mode, print_progress = False)
         training_data = training_data.append({"game_counter": game_counter, "result": result}, ignore_index = True)
         if game_counter % resolution == 0:
+            selected_mode = random.choice(modes)
             print("Game #: ", game_counter)
+            print("Mode:", selected_mode)
         game_counter += 1
     return model, training_data
 
@@ -139,6 +150,15 @@ if __name__ == "__main__":
     
 
     if toTrain == "Y":
+        
+        print("""Choose bots that the neural network should train against: 
+          1) Difficulty bot: Hard
+          2) Difficulty bot: Easy
+          3) Random bot
+          Pass argument of bots you want to use without spaces, for example "12", or "23".  """)
+        botsToTrain = input()
+        
+        
         overwrite = "N"
         if os.path.isfile(fileName):
             print("File already exists, are you sure you want to overwrite? (Y / N)")
@@ -148,13 +168,13 @@ if __name__ == "__main__":
         print("How many bins?")
         nBins = int(input())
         model = botNeuralNetwork.model
-        model, training_data = train_model(model, nIts, resolution = nIts//nBins)
+        model, training_data = train_model(model, botsToTrain, nIts, resolution = nIts//nBins)
         
-        bins = np.arange(1, nBins) * nIts//nBins
+        bins = np.arange(1, 20) * nIts//20
         training_data['game_counter_bins'] = np.digitize(training_data["game_counter"], bins, right=True)
         counts = training_data.groupby(['game_counter_bins', 'result']).game_counter.count().unstack()
         ax=counts.plot(kind='bar', stacked=True,figsize=(10,5))
-        ax.set_xlabel("Count of Games in Bins of " + str(nIts//nBins) + "s")
+        ax.set_xlabel("Count of Games in Bins of " + str(nIts//20) + "s")
         ax.set_ylabel("Counts of Draws/Losses/Wins")
         ax.set_title('Distribution of Results Vs Count of Games Played')
         plt.savefig("training_results.pdf")

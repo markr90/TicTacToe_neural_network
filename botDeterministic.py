@@ -4,6 +4,8 @@ Created on Sat Jul 27 19:41:27 2019
 
 @author: Mark
 """
+
+import random
 import tictactoeBasics
 
 def boardCopy(board):
