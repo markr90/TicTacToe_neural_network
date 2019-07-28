@@ -57,7 +57,10 @@ class TicTacToeGame(object):
         print("___|___|___")
         print("   |   |   ")
         print("", self.board[1], "|", self.board[2], "|", self.board[3])
-
+        
+    
+   
+    
     def selectPlayer(self):
         print("Do you want to be X or O?")
         playerLetter = input().upper()  

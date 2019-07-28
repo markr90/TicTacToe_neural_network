@@ -8,7 +8,7 @@ Created on Sat Jul 27 22:05:59 2019
 import tictactoeBasics
 import botDeterministic
 import botRandom
-import botNeuralNetwork
+import botSGD
 import numpy as np
 
 from scipy.ndimage.interpolation import shift
@@ -59,12 +59,13 @@ def train(model, mode, print_progress = False):
                 whosTurn = "computer"
         else: 
             # Neural network bot plays
-            (move, new_board_state, score) = botNeuralNetwork.move_selector(
+            (move, new_board_state, score) = botSGD.move_selector(
                                                             model,
                                                             game.getBoard(),
                                                             aliceLetter)
+
             scores_list.append(score[0][0])
-            new_board_integer = botNeuralNetwork.board_integer_representation(new_board_state)
+            new_board_integer = botSGD.board_integer_representation(new_board_state)
             new_board_states_list.append(new_board_integer)
             game.makeMove(aliceLetter, move)
             if print_progress:

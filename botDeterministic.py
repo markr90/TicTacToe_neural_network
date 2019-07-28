@@ -143,7 +143,7 @@ def getComputerMove(runningGame, letter, botDifficulty, printMoves = False):
         if len(emptyCorners) > 0:
             if printMoves:
                 print("Computer plays empty corner")
-            return emptyCorners[0] #doesn't matter which empty corner you take
+            return random.choice(emptyCorners) #doesn't matter which empty corner you take
         # empty side
         emptySides = []
         for i in [2,4,6,8]:
@@ -152,7 +152,7 @@ def getComputerMove(runningGame, letter, botDifficulty, printMoves = False):
         if len(emptySides) > 0:
             if printMoves:
                 print("Computer playes empty side")
-            return emptySides[0]
+            return random.choice(emptySides)
         
     if botDifficulty == "easy":
         move = random.choice(freespots)

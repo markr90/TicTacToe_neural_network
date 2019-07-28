@@ -9,14 +9,11 @@ import random
 import exitModule
 import tictactoeBasics
 import botDeterministic
-import botNeuralNetwork
+import botTQ
 import botRandom
-import train
+import TQmodel_train
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.models import load_model
-import os.path
 
 
 
@@ -35,12 +32,10 @@ def replay():
         print("Not a valid choice")
         return replay()
     
-def main(model):
-    
-    
+def main(bot, updateQ = True):
     
     print("""Welcome to TicTacToe AI. Play TicTacToe against different kinds of bots.
-          See if you are smarter than a neural network... Or if you can play a draw
+          See if you are smarter than a TQ bot... Or if you can play a draw
           against the unbeatable hard mode bot every game!
           You can exit at any given time with <exit>.""")
     
@@ -52,22 +47,15 @@ def main(model):
           1) Difficulty bot: Hard
           2) Difficulty bot: Easy
           3) Random bot
-          4) Self learning neural network bot (you need to train this bot first!)""")
+          4) Self learning TQ bot """)
     
         playMode = input()
         if playMode == "exit":
             print("Quitting game...")
             break
-        if playMode == "4":
-            if not model:
-                print("Model has not been trained yet!!")
-                continue
         playing = True
         game.newBoard()
-        playerLetter, computerLetter = game.selectPlayer()
-        if exitModule.QUITGAME:
-            print("Quitting game...")
-            break
+        playerLetter, computerLetter = "X", "O"
         whosTurn = game.whoGoesFirst()
         print("It's", whosTurn, "turn:")
         
@@ -81,10 +69,12 @@ def main(model):
                     break
                 if game.isWinner(playerLetter):
                     game.drawBoard()
+                    game_status = "lost"
                     print ("Player has won the game, congratulations!")
                     playing = False
                 elif game.boardFull():
                     game.drawBoard()
+                    game_status = "draw"
                     print("Too bad! Game is a tie, try again.")
                     playing = False
                 else:
@@ -97,60 +87,87 @@ def main(model):
                 elif playMode == "3":
                     move = botRandom.getComputerMove(game, computerLetter)
                 elif playMode == "4":
-                    (move, new_board_state, score) = botNeuralNetwork.move_selector(
-                                                                model,
-                                                                game.getBoard(),
-                                                                computerLetter)
-                    print("Bot played move:", move, "with score:", score)
+                    (move, score) = bot.get_move(game.getBoard(), computerLetter)
                 game.makeMove(computerLetter, move)
                 if game.isWinner(computerLetter):
                     game.drawBoard()
+                    game_status = "won"
                     print ("Game over! Computer has won the game.")
                     playing = False
                 elif game.boardFull():
                     game.drawBoard()
+                    game_status = "draw"
                     print("Too bad! Game is a tie, try again.")
                     playing = False
                 else:
                     whosTurn = "player"
+                    
+        if updateQ:
+            bot.update_Qfunction(game_status)
+        bot.reset_move_history()
         if exitModule.QUITGAME:
             break
         if not replay():
             break
         
-def train_model(model, botsToTrain, nIterations, resolution = 10000):
-    training_data = pd.DataFrame()
-    game_counter = 1
+        
+      
+def train_model(bot, botsToTrain, nIterations, resolution = 50):
+    progress_data = pd.DataFrame()
     availableModes = ["hard", "easy", "random"]
-    
     modes = []
     for i in botsToTrain:
         modes.append(availableModes[int(i) - 1])
-        
     if len(modes) == 0:
-        modes = availableModes[:]
-    
-    
+        modes = availableModes[:]  
     selected_mode = random.choice(modes)
-    while game_counter <= nIterations:
-        model, y, result = train.train(model, selected_mode, print_progress = False)
-        training_data = training_data.append({"game_counter": game_counter, "result": result}, ignore_index = True)
+    
+    for game_counter in range(nIterations):
         if game_counter % resolution == 0:
-            selected_mode = random.choice(modes)
             print("Game #: ", game_counter)
             print("Mode:", selected_mode)
-        game_counter += 1
-    return model, training_data
+            selected_mode = random.choice(modes)
+            
+            nWins = 0
+            nDraws = 0
+            nLosses = 0
+            
+            for measGame in range(50):
+                # Play 20 bot matches against the deterministic optimal bot
+                # to track learning progress
+                result = TQmodel_train.trainTQbot("easy", bot, updateQ = False, print_progress = False)
+                if result == "won":
+                    nWins += 1
+                elif result == "draw":
+                    nDraws += 1
+                else:
+                    nLosses += 1
+                    
+            progress_data = progress_data.append({"game_counter": game_counter, 
+                           "nWins": nWins, 
+                           "nDraws": nDraws, 
+                           "nLosses": nLosses,
+                           "winPercent": nWins / (nWins + nDraws + nLosses),
+                           "drawPercent": nDraws / (nWins + nDraws + nLosses),
+                           "lossPercent": nLosses / (nWins + nDraws + nLosses)}, 
+                        ignore_index = True)   
+        
+        result = TQmodel_train.trainTQbot(selected_mode, bot, updateQ = True, print_progress = False)
+    
+    return progress_data
+        
+        
+        
 
 
 if __name__ == "__main__":
-    print("Do you want to train the model (Y / N)? Or use old saved model (enter \"old\")")
-    toTrain = input().upper() 
-    fileName = "trained_model.h5"    
+    print("Do you want to train the model (Y / N)?")
+    toTrain = input().upper()
+    
+    botAlice = botTQ.botTQ()
     
 
     if toTrain == "Y":
-        
         print("""Choose bots that the neural network should train against: 
           1) Difficulty bot: Hard
           2) Difficulty bot: Easy
@@ -158,42 +175,15 @@ if __name__ == "__main__":
           Pass argument of bots you want to use without spaces, for example "12", or "23".  """)
         botsToTrain = input()
         
-        
-        overwrite = "N"
-        if os.path.isfile(fileName):
-            print("File already exists, are you sure you want to overwrite? (Y / N)")
-            overwrite = input().upper()
         print("How many iterations do you want to train?")
         nIts = int(input())
-        print("How many bins?")
-        nBins = int(input())
-        model = botNeuralNetwork.model
-        model, training_data = train_model(model, botsToTrain, nIts, resolution = nIts//nBins)
         
-        bins = np.arange(1, 20) * nIts//20
-        training_data['game_counter_bins'] = np.digitize(training_data["game_counter"], bins, right=True)
-        counts = training_data.groupby(['game_counter_bins', 'result']).game_counter.count().unstack()
-        ax=counts.plot(kind='bar', stacked=True,figsize=(10,5))
-        ax.set_xlabel("Count of Games in Bins of " + str(nIts//20) + "s")
-        ax.set_ylabel("Counts of Draws/Losses/Wins")
-        ax.set_title('Distribution of Results Vs Count of Games Played')
-        plt.savefig("training_results.pdf")
+        progress_data = train_model(botAlice, botsToTrain, nIts)
         
-        if not os.path.isfile(fileName):
-            model.save(fileName)            
-        if overwrite == "Y":
-            model.save(fileName)
-    elif toTrain.lower() == "old":
-        print("Loading model...")
-        model = load_model(fileName)
-    
-    else:
-        model = None
+        ax2 = progress_data.plot(x = "game_counter", y = ["winPercent", "drawPercent", "lossPercent"])
+        plt.savefig("TQPlayer_progress_results.pdf")
             
-    if not model:
-        main(model)
-    else:
-        main(model)
+    main(botAlice)
     
          
     
