@@ -14,7 +14,7 @@
  
  This bot always uses an optimal strategy. Players can at best play a draw against this bot. 
  
- **This bot has a bug somewhere, it is not as deterministic as I thought. The tabular Q learning bot manages to exploit a weakness somewhere in this bot and actually win about half of the games against it if the TQ bot is trained on all 3 bots uniformly.**
+ **This bot has a bug somewhere, it is not as unbeatable as I thought. The tabular Q learning bot manages to exploit a weakness somewhere in this bot and actually win about half of the games against it if the TQ bot is trained on all 3 bots uniformly.**
  
  ### A semi-deterministic "easy" bot
  
