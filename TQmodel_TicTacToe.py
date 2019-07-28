@@ -135,7 +135,7 @@ def train_model(bot, botsToTrain, nIterations, resolution = 50):
             for measGame in range(50):
                 # Play 20 bot matches against the deterministic optimal bot
                 # to track learning progress
-                result = TQmodel_train.trainTQbot("easy", bot, updateQ = False, print_progress = False)
+                result = TQmodel_train.trainTQbot("hard", bot, updateQ = False, print_progress = False)
                 if result == "won":
                     nWins += 1
                 elif result == "draw":

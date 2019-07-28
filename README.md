@@ -1,7 +1,5 @@
  # A Tic Tac Toe python game
  
- Code hasn't been commented yet.
- 
  A Tic Tac Toe python game that Credits for inspiration of some of the snippets of code:
  [Code inspiration for the game basics definition](https://inventwithpython.com/chapter10.html)
  [Code inspiration for the neural network implementation](https://www.kaggle.com/dhanushkishore/a-self-learning-tic-tac-toe-program)
@@ -15,6 +13,8 @@
  ### A deterministic "hard" unbeatable bot 
  
  This bot always uses an optimal strategy. Players can at best play a draw against this bot. 
+ 
+ <span style="color:red">some This bot has a bug somewhere, it is not as deterministic as I thought. The tabular Q learning bot manages to exploit a weakness somewhere in this bot and actually win about half of the games against it if the TQ bot is trained on all 3 bots uniformly. text</span>
  
  ### A semi-deterministic "easy" bot
  
@@ -40,6 +40,10 @@
  
  In the tabular Q model the bot keeps track of all its moves and adjusts values to all possible board combinations (moves) depending on the outcome of the match.
  
- The Q values are updated through
-
- $$Q(S, a) = {(1 - k) * Q(S, a) + k * g * max_a' ( Q(S', a') )} $$
+ The Q values are updated through Q(S, a) = (1 - k) Q(S, a) + k g  max_a' ( Q(S', a') ), with k the learning rate, g the discount factor. Based on [Carsten's blog](https://medium.com/@carsten.friedrich/part-3-tabular-q-learning-a-tic-tac-toe-player-that-gets-better-and-better-fa4da4b0892a)
+ 
+ This model manages to figure out how to win / draw against any of the hard, easy, or random bots in about 20'000 iterations. The models algorithm is also many times faster due to its simplicity.
+ 
+ ## The code has room for improvement
+ 
+ The code is somewhat messy, looking back at the code I should have defined classes for the players and built it up from there. Currently only the TQ bot is a class. If anybody feels like improving the code, be my guest... It was just an exercise for me to see if I could get a tic tac toe bot to learn!
