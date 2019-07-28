@@ -13,13 +13,21 @@ DRAW_VALUE = 0.5  # type: float
 LOSS_VALUE = 0.0  # type: float
 
 def hash_value(board_state):
-        res = ""
-        for i in range(1,10):
-            res = res + board_state[i]
-        return res
+    """ Creates a special ID for the board state which is just a string
+    representation of the board, i.e "  X O   X" with spaces denoting empty
+    board positions
+    """
+    res = ""
+    for i in range(1,10):
+        res = res + board_state[i]
+    return res
 
 class botTQ(object):
-    
+    """ The tabular Q learning bot
+    What it does is it tracks all its historic moves and keeps a dictionary with
+    all past board states in hash form
+    i.e q = {board_hash: qvals for the moves 1-9}
+    """
     def __init__(self, alpha = 0.9, gamma = 0.95, q_init = 0.6):
         self.q = {}
         self.move_history = []
@@ -28,7 +36,7 @@ class botTQ(object):
         self.q_init_val = q_init
     
     def get_q(self, board_hash):
-        
+        """ gets the q values for the board board_hash """
         if board_hash in self.q:
             qvals = self.q[board_hash]
         else:
@@ -38,6 +46,10 @@ class botTQ(object):
         return qvals
     
     def get_move(self, board_state, letter):
+        """ Takes argument board_state and letter (symbol) 
+        finds the optimal move by taking the move that has the highest
+        q value associated to it, returns that move
+        if a move is illegal it associates the value -1.0 to that move"""
         board_hash = hash_value(board_state)
         qvals = self.get_q(board_hash)
         freeMoves = freePositions(board_state)
@@ -53,7 +65,13 @@ class botTQ(object):
                 qvals[bestMove] = -1.0
      
     def update_Qfunction(self, result):
-        
+        """ Updates the Q function for the bot depending on if the bot won
+        lost or drawed. With values 1, 0.5, and 0 correspondingly 
+        Updates the q values according to learning rate and value discount
+        Q(S,A) = Q(S, A) * (1 - lr) + lr * vd * max_a Q(S', a)
+        Where A is the move on board S and Q(S', a) is the max value q for the
+        next board state S'. Loops all historic moves ( in reverse ) and assigns
+        new q values for all the boards S that occured during the game"""
         if result == "won":
             final_value = WIN_VALUE
         elif result == "draw":
@@ -77,6 +95,7 @@ class botTQ(object):
             next_max = max(qvals)
     
     def reset_move_history(self):
+        # resets move history
         self.move_history = []
         
         

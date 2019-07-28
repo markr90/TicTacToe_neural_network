@@ -10,11 +10,11 @@
  
  Game consists of four diffent difficulty bots
  
- ### A deterministic "hard" unbeatable bot 
+ ### A "hard" optimal strategy bot 
  
- This bot always uses an optimal strategy. Players can at best play a draw against this bot. 
+ This bot always uses an optimal strategy. Players can at best play a draw against this bot when it's gets first turn.
  
- **This bot has a bug somewhere, it is not as unbeatable as I thought. The tabular Q learning bot manages to exploit a weakness somewhere in this bot and actually win about half of the games against it if the TQ bot is trained on all 3 bots uniformly.**
+ ** The strategy implemented assumes it has first move. But if the optimal strategy bot is playing second it should adopt a different strategy. The tabular Q bot actually manages to exploit this weakness and win half its games against the optimal strategy bot!. If the TQ bot is trained against only this bot it learns to exploit this strategy in less than 1000 games. Trained on all 3 bots it takes around 20'000 games to find the optimal strategy.**
  
  ### A semi-deterministic "easy" bot
  

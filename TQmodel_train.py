@@ -10,21 +10,24 @@ import botDeterministic
 import botRandom
 
 def trainTQbot(mode, bot, updateQ = True, print_progress = False):
+    """
+    Trains the tabular Q bot. Plays against any of the hard, easy or 
+    random bots. If updateQ = False the Q function for the bot will not be modified
+    
+    Returns the result of the game "won" or "draw" or "loss"
+    """
+    
+    # Initialize the game
     game = tictactoeBasics.TicTacToeGame()   
-      
-
-    """Initialize the game
-    Two bots called Bob and Alice
-    If neural network bot wins assign score
-    win = 1, draw = 0, loss = -1"""
     game.newBoard()
     bobLetter, aliceLetter = "X", "O"
     whosTurn = game.whoGoesFirst()
     playing = True
     
+    # play the game
     while playing:
         if whosTurn == "player": 
-            # Deterministic bot plays
+            # hard / easy / random bot turn
             if mode == "hard":
                 if print_progress:                
                     print("playing against hard")
@@ -42,7 +45,7 @@ def trainTQbot(mode, bot, updateQ = True, print_progress = False):
                 print("Bob made move:", move)
                 game.drawBoard()
                 
-            # machine_learning bot loses
+            # Check if player X wins or created a draw
             if game.isWinner(bobLetter):
                 game_status = "lost"
                 playing = False
@@ -52,12 +55,14 @@ def trainTQbot(mode, bot, updateQ = True, print_progress = False):
             else:
                 whosTurn = "computer"
         else: 
-            # Neural network bot plays
+            # Machine learning bot plays
             (move, score) = bot.get_move(game.getBoard(), aliceLetter)
             game.makeMove(aliceLetter, move)
             if print_progress:
                 print("Alice made move:", move, "with score:", score)
                 game.drawBoard()
+            
+            # Check if player O wins or created a draw
             if game.isWinner(aliceLetter):
                 game_status = "won"
                 playing = False
@@ -67,6 +72,7 @@ def trainTQbot(mode, bot, updateQ = True, print_progress = False):
             else:
                 whosTurn = "player"
     
+    # update Q function
     if updateQ:
         bot.update_Qfunction(game_status)
     bot.reset_move_history()
