@@ -21,6 +21,10 @@
  ### A pure random bot
  
  This bot plays moves from a uniform distribution of the available movesets.
+
+ ### Self learning bot 
+
+ Self learning bot uses a tabular Q learning model.
  
  ## Tabular Q Learning model bot
  
