@@ -5,9 +5,9 @@ Created on Sat Jul 27 22:05:59 2019
 @author: Mark
 """
 
-import tictactoeBasics
-import botDeterministic
-import botRandom
+import TicTacToeGame
+from botDeterministic import botDeterministic
+from botRandom import botRandom
 
 def trainTQbot(mode, bot, updateQ = True, print_progress = False):
     """
@@ -18,35 +18,37 @@ def trainTQbot(mode, bot, updateQ = True, print_progress = False):
     """
     
     # Initialize the game
-    game = tictactoeBasics.TicTacToeGame()   
-    game.newBoard()
+    game = TicTacToeGame.TicTacToeGame(bot)   
+    game.resetBoard()
     bobLetter, aliceLetter = "X", "O"
     whosTurn = game.whoGoesFirst()
     playing = True
+    
+    if mode == "hard":
+        botToTrainAgainst = botDeterministic("hard")     
+        if print_progress:                
+            print("playing against hard")
+    if mode == "easy":
+        botToTrainAgainst = botDeterministic("easy")     
+        if print_progress:                
+            print("playing against easy")
+    if mode == "random":
+        botToTrainAgainst = botRandom()     
+        if print_progress:                
+            print("playing against random")
     
     # play the game
     while playing:
         if whosTurn == "player": 
             # hard / easy / random bot turn
-            if mode == "hard":
-                if print_progress:                
-                    print("playing against hard")
-                move = botDeterministic.getComputerMove(game, bobLetter, mode)
-            if mode == "easy":
-                if print_progress:                
-                    print("playing against easy")
-                move = botDeterministic.getComputerMove(game, bobLetter, mode)
-            if mode == "random":
-                if print_progress:
-                    print("playing against random")
-                move = botRandom.getComputerMove(game, bobLetter)
+            move = botToTrainAgainst.GetMove(game, bobLetter)
             game.makeMove(bobLetter, move)
             if print_progress:
                 print("Bob made move:", move)
                 game.drawBoard()
                 
             # Check if player X wins or created a draw
-            if game.isWinner(bobLetter):
+            if TicTacToeGame.isWinner(game.getBoard(), bobLetter):
                 game_status = "lost"
                 playing = False
             elif game.boardFull():
@@ -63,7 +65,7 @@ def trainTQbot(mode, bot, updateQ = True, print_progress = False):
                 game.drawBoard()
             
             # Check if player O wins or created a draw
-            if game.isWinner(aliceLetter):
+            if TicTacToeGame.isWinner(game.getBoard(), aliceLetter):
                 game_status = "won"
                 playing = False
             elif game.boardFull():

@@ -5,8 +5,12 @@ Created on Sun Jul 28 17:07:19 2019
 @author: Mark
 """
 
-from tictactoeBasics import freePositions
 import numpy as np
+import TicTacToeGame
+from IBot import IBot
+import pandas as pd
+import random
+import TQmodel_train
 
 WIN_VALUE = 1.0  # type: float
 DRAW_VALUE = 0.5  # type: float
@@ -20,9 +24,64 @@ def hash_value(board_state):
     res = ""
     for i in range(1,10):
         res = res + board_state[i]
-    return res
+    return res        
+      
+def train_model(bot, nIterations, resolution = 50):
+    """args
+    bot: the bot to be trained
+    nIterations how many training iterations do you want to do
+    approximately 20'000 are needed to train against all 3 bots
+    resolution is the distance between the points in the training graph
+    in the x axis (game_counter axis)
 
-class botTQ(object):
+    returns the training progress dataframe progress_data"""
+    
+    # Track training progress
+    progress_data = pd.DataFrame()
+    # Define bots to train against
+    modes = ["hard", "easy", "random"]
+    selected_mode = random.choice(modes)
+    
+    # Train the bot
+    for game_counter in range(nIterations):
+        if game_counter % resolution == 0:
+            print("Game #: ", game_counter)
+            print("Mode:", selected_mode)
+            selected_mode = random.choice(modes)
+            
+            nWins = 0
+            nDraws = 0
+            nLosses = 0
+            
+            # Track training progress by playing 50 dummy games without training
+            # the bot and saving the data to progress_data
+            # probabl a way to track the progress of the bot more efficiently
+            # but too lazy to think of a way since this algorithm is so fast
+            for measGame in range(50):
+                # Play 20 bot matches against the deterministic optimal bot
+                # to track learning progress
+                result = TQmodel_train.trainTQbot("easy", bot, updateQ = False, print_progress = False)
+                if result == "won":
+                    nWins += 1
+                elif result == "draw":
+                    nDraws += 1
+                else:
+                    nLosses += 1
+                    
+            progress_data = progress_data.append({"game_counter": game_counter, 
+                           "nWins": nWins, 
+                           "nDraws": nDraws, 
+                           "nLosses": nLosses,
+                           "winPercent": nWins / (nWins + nDraws + nLosses),
+                           "drawPercent": nDraws / (nWins + nDraws + nLosses),
+                           "lossPercent": nLosses / (nWins + nDraws + nLosses)}, 
+                        ignore_index = True)   
+        # this result isn't used but you can if you want 
+        result = TQmodel_train.trainTQbot(selected_mode, bot, updateQ = True, print_progress = False)
+    
+    return progress_data
+
+class botTQ(IBot):
     """ The tabular Q learning bot
     What it does is it tracks all its historic moves and keeps a dictionary with
     all past board states in hash form
@@ -44,6 +103,10 @@ class botTQ(object):
             self.q[board_hash] = qvals
         
         return qvals
+
+    def GetMove(self, game, letter):
+        (move, score) = self.get_move(game.getBoard(), letter)
+        return move
     
     def get_move(self, board_state, letter):
         """ Takes argument board_state and letter (symbol) 
@@ -52,8 +115,7 @@ class botTQ(object):
         if a move is illegal it associates the value -1.0 to that move"""
         board_hash = hash_value(board_state)
         qvals = self.get_q(board_hash)
-        freeMoves = freePositions(board_state)
-        
+        freeMoves = TicTacToeGame.getFreePositions(board_state)        
         
         while True:
             bestMove = np.argmax(qvals)  # type: int
