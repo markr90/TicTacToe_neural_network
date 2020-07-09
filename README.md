@@ -33,3 +33,5 @@
  The Q values are updated through Q(S, a) = (1 - k) Q(S, a) + k g  max_a' ( Q(S', a') ), with k the learning rate, g the discount factor. Based on [Carsten's blog](https://medium.com/@carsten.friedrich/part-3-tabular-q-learning-a-tic-tac-toe-player-that-gets-better-and-better-fa4da4b0892a)
  
  This model manages to figure out how to win / draw against any of the hard, easy, or random bots in about 20'000 iterations. 
+
+ ![alt text](https://github.com/markr90/TicTacToe_neural_network/blob/master/TQ_Train_Progress.jpg?raw=true)
