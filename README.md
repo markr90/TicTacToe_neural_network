@@ -24,7 +24,7 @@
 
  ### Self learning bot 
 
- Self learning bot uses a tabular Q learning model.
+ Self learning bot uses a tabular Q learning model. Results of trainig this bot are shown in the PDF file inside this repository.
  
  ## Tabular Q Learning model bot
  
